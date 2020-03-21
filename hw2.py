@@ -41,7 +41,12 @@ def countries_with_no_deaths_count(date: datetime.date) -> int:
     """
     
     # Your code goes here
-    pass
+    sformat_data = format_date(date)
+    infek_sm = dfC[['Province/State', 'Country/Region', sformat_data]].merge(dfD[['Province/State', 'Country/Region', sformat_data]], on = ['Province/State', 'Country/Region'])
+    infek_sm.columns = ['Province/State', 'Country/Region', 'confirmed', 'deaths']
+    objawy = infek_sm.loc[infek_sm['confirmed'] > 0]
+    objawy_bez_sm = objawy.loc[objawy['deaths'] == 0]
+    return objawy_bez_sm.count()[3]
 
 
 def more_cured_than_deaths_indices(date: datetime.date) -> List[int]:
@@ -68,4 +73,7 @@ def more_cured_than_deaths_indices(date: datetime.date) -> List[int]:
     """
     
     # Your code goes here
-    pass
+    sformat_data = format_date(date)
+    ulecz_sm = dfD[['Province/State', 'Country/Region', sformat_data]].merge(dfR[['Province/State', 'Country/Region', sformat_data]], on = ['Province/State', 'Country/Region'])
+    ulecz_sm.columns = ['Province/State', 'Country/Region', 'deaths', 'recovers']
+    return ulecz_sm.loc[ulecz_sm['deaths'] < ulecz_sm['recovers']].index.to_list()

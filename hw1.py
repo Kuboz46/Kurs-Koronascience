@@ -29,7 +29,12 @@ def poland_cases_by_date(day: int, month: int, year: int = 2020) -> int:
     """
     
     # Your code goes here (remove pass)
-    pass
+    df_cleaned=confirmed_cases.melt(id_vars=['Province/State','Country/Region','Lat','Long'],value_name='Cases',var_name='Date')
+    df_cleaned=df_cleaned.set_index(['Country/Region', 'Province/State', 'Lat', 'Long'])
+    w_Polsce = df_cleaned.loc["Poland"]
+    year = year - 2000
+    wtedy_w_Polsce = w_Polsce.loc[w_Polsce.Date == f"{month}/{day}/{year}"]
+    return wtedy_w_Polsce.Cases[0]
 
 
 def top5_countries_by_date(day: int, month: int, year: int = 2020) -> List[str]:
@@ -49,7 +54,18 @@ def top5_countries_by_date(day: int, month: int, year: int = 2020) -> List[str]:
     """
 
     # Your code goes here (remove pass)
-    pass
+    import datetime as dat
+    wtedy = dat.date(year, month, day)
+    wtedy_mod1 = wtedy.strftime('%m/%d/%y')
+    wtedy_mod2 = wtedy_mod1.lstrip("0")
+    wtedy_mod3 = wtedy_mod2.replace(" 0", " ")
+    wtedy_mod4 = wtedy_mod3.replace("/0", "/")
+    tutaj = confirmed_cases[["Country/Region", wtedy_mod4]]
+    grup = tutaj.groupby(["Country/Region"])
+    suma = grup.sum()
+    sortow = suma.sort_values(by = wtedy_mod4, ascending = False)
+    kraje = sortow.head(5)
+    return list(kraje.index)
 
 # Function name is wrong, read the pydoc
 def no_new_cases_count(day: int, month: int, year: int = 2020) -> int:
@@ -70,4 +86,17 @@ def no_new_cases_count(day: int, month: int, year: int = 2020) -> int:
     """
     
     # Your code goes here (remove pass)
-    pass
+    import datetime as dat
+    dzisiaj = dat.date(year, month, day)
+    dzisiaj_mod1 = dzisiaj.strftime('%m/%d/%y')
+    dzisiaj_mod2 = dzisiaj_mod1.lstrip("0")
+    dzisiaj_mod3 = dzisiaj_mod2.replace(" 0", " ")
+    dzisiaj_mod4 = dzisiaj_mod3.replace("/0", "/")
+    wczoraj = dzisiaj - dat.timedelta(days = 1)
+    wczoraj_mod1 = wczoraj.strftime('%m/%d/%y')
+    wczoraj_mod2 = wczoraj_mod1.lstrip("0")
+    wczoraj_mod3 = wczoraj_mod2.replace(" 0", " ")
+    wczoraj_mod4 = wczoraj_mod3.replace("/0", "/")
+    rozneliczby = confirmed_cases.loc[confirmed_cases[wczoraj_mod4] - confirmed_cases[dzisiaj_mod4] != 0]
+    rozneliczby_idx = rozneliczby.index
+    return len(rozneliczby_idx)
